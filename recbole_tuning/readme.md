@@ -5,6 +5,6 @@ hyper_tuning.py
 
 경로는 opt > conda > lib > python3.8 > site_packaghes > hyperopt > pyll > stochastic.py > randint 입니다.
 - 본인의 conda가 설치된 위치에서 hyperopt안의 stochastic.py를 덮어씌우시면 됩니다.
-
+변경된 코드는 대략 127번째 줄입니다.
 # 주의
 - 혹시 모를 상황에 대비해서 원본파일을 백업해두시기 바랍니다.
