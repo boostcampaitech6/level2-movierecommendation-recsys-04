@@ -3,7 +3,7 @@ V0:
   model: MultiDAE
   data_path: /data/ephemeral/data/train/
   model_save_path: /data/ephemeral/level2-movierecommendation-recsys-04/code/Autoencoders/saved/
-  submit_path: 
+  submit_path: /data/ephemeral/level2-movierecommendation-recsys-04/code/Autoencoders/submit/
   seed: 42
   parameters:
     epochs: 20

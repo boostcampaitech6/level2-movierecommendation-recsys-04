@@ -69,11 +69,80 @@ def numerize(tp, profile2id, show2id):
     return pd.DataFrame(data={"uid": uid, "sid": sid}, columns=["uid", "sid"])
 
 
-def DataPreprocess(data_path):
-    raw_data = pd.read_csv(os.path.join(data_path, "train_ratings.csv"), header=0)
+def Data_Preprocess(config):
+    raw_data = pd.read_csv(
+        os.path.join(config["data_path"], "train_ratings.csv"), header=0
+    )
     raw_data, user_activity, item_popularity = filter_triplets(
         raw_data, min_uc=5, min_sc=0
     )
+
+    # Shuffle User Indices
+    unique_uid = user_activity["user"].unique()
+    np.random.seed(config["seed"])
+    idx_perm = np.random.permutation(unique_uid.size)
+    unique_uid = unique_uid[idx_perm]
+
+    n_users = unique_uid.size  # 31360
+    n_heldout_users = 3000
+
+    # Split Train/Validation/Test User Indices
+    tr_users = unique_uid[: (n_users - n_heldout_users * 2)]
+    vd_users = unique_uid[(n_users - n_heldout_users * 2) : (n_users - n_heldout_users)]
+    te_users = unique_uid[(n_users - n_heldout_users) :]
+
+    # 주의: 데이터의 수가 아닌 사용자의 수입니다!
+    print("훈련 데이터에 사용될 사용자 수:", len(tr_users))
+    print("검증 데이터에 사용될 사용자 수:", len(vd_users))
+    print("테스트 데이터에 사용될 사용자 수:", len(te_users))
+
+    ##훈련 데이터에 해당하는 아이템들
+    # Train에는 전체 데이터를 사용합니다.
+    train_plays = raw_data.loc[raw_data["user"].isin(tr_users)]
+
+    ##아이템 ID
+    unique_sid = pd.unique(train_plays["item"])
+
+    show2id = dict((sid, i) for (i, sid) in enumerate(unique_sid))
+    profile2id = dict((pid, i) for (i, pid) in enumerate(unique_uid))
+
+    pro_dir = os.path.join(config["data_path"], "pro_sg")
+
+    if not os.path.exists(pro_dir):
+        os.makedirs(pro_dir)
+
+    with open(os.path.join(pro_dir, "unique_sid.txt"), "w") as f:
+        for sid in unique_sid:
+            f.write("%s\n" % sid)
+
+    # Validation과 Test에는 input으로 사용될 tr 데이터와 정답을 확인하기 위한 te 데이터로 분리되었습니다.
+    vad_plays = raw_data.loc[raw_data["user"].isin(vd_users)]
+    vad_plays = vad_plays.loc[vad_plays["item"].isin(unique_sid)]
+    vad_plays_tr, vad_plays_te = split_train_test_proportion(vad_plays)
+
+    test_plays = raw_data.loc[raw_data["user"].isin(te_users)]
+    test_plays = test_plays.loc[test_plays["item"].isin(unique_sid)]
+    test_plays_tr, test_plays_te = split_train_test_proportion(test_plays)
+
+    train_data = numerize(train_plays, profile2id, show2id)
+    train_data.to_csv(os.path.join(pro_dir, "train.csv"), index=False)
+
+    vad_data_tr = numerize(vad_plays_tr, profile2id, show2id)
+    vad_data_tr.to_csv(os.path.join(pro_dir, "validation_tr.csv"), index=False)
+
+    vad_data_te = numerize(vad_plays_te, profile2id, show2id)
+    vad_data_te.to_csv(os.path.join(pro_dir, "validation_te.csv"), index=False)
+
+    test_data_tr = numerize(test_plays_tr, profile2id, show2id)
+    test_data_tr.to_csv(os.path.join(pro_dir, "test_tr.csv"), index=False)
+
+    test_data_te = numerize(test_plays_te, profile2id, show2id)
+    test_data_te.to_csv(os.path.join(pro_dir, "test_te.csv"), index=False)
+
+    submit_data = numerize(raw_data, profile2id, show2id)
+    submit_data.to_csv(os.path.join(pro_dir, "submit_data.csv"), index=False)
+
+    print("Done!")
 
 
 class DataLoader:
@@ -97,6 +166,8 @@ class DataLoader:
             return self._load_tr_te_data(datatype)
         elif datatype == "test":
             return self._load_tr_te_data(datatype)
+        elif datatype == "submit":
+            return self._load_submit_data(datatype)
         else:
             raise ValueError("datatype should be in [train, validation, test]")
 
@@ -146,3 +217,9 @@ class DataLoader:
             shape=(end_idx - start_idx + 1, self.n_items),
         )
         return data_tr, data_te
+
+    def _load_submit_data(self, datatype="submit"):
+        path = os.path.join(self.pro_dir, "submit_data.csv")
+        submit_data = pd.read_csv(path)
+
+        return submit_data

@@ -1,7 +1,6 @@
 import time
 import os
 import torch
-import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
 import torch.optim as optim
@@ -9,8 +8,8 @@ import pandas as pd
 import bottleneck as bn
 
 from scipy import sparse
-from metric import NDCG_binary_at_k_batch, Recall_at_k_batch, Recall_at_k_batch
-from dataloader import numerize
+from .metric import NDCG_binary_at_k_batch, Recall_at_k_batch, Recall_at_k_batch
+from .dataloader import filter_triplets
 
 
 def sparse2torch_sparse(data):
@@ -37,6 +36,8 @@ def naive_sparse2tensor(data):
 
 
 def train(config, model, train_data, criterion, optimizer, is_VAE=False):
+    parameters = config["parameters"]
+
     N = train_data.shape[0]
     idxlist = list(range(N))
 
@@ -44,23 +45,24 @@ def train(config, model, train_data, criterion, optimizer, is_VAE=False):
     model.train()
     train_loss = 0.0
     start_time = time.time()
-    global update_count
+    update_count = 0
 
     np.random.shuffle(idxlist)
 
-    for batch_idx, start_idx in enumerate(range(0, N, config.batch_size)):
-        end_idx = min(start_idx + config.batch_size, N)
+    for batch_idx, start_idx in enumerate(range(0, N, parameters["batch_size"])):
+        end_idx = min(start_idx + parameters["batch_size"], N)
         data = train_data[idxlist[start_idx:end_idx]]
-        data = naive_sparse2tensor(data).to(config.device)
+        data = naive_sparse2tensor(data).to(config["device"])
         optimizer.zero_grad()
 
         if is_VAE:
-            if config.total_anneal_steps > 0:
+            if parameters["total_anneal_steps"] > 0:
                 anneal = min(
-                    config.anneal_cap, 1.0 * update_count / config.total_anneal_steps
+                    parameters["anneal_cap"],
+                    1.0 * update_count / parameters["total_anneal_steps"],
                 )
             else:
-                anneal = config.anneal_cap
+                anneal = parameters["anneal_cap"]
 
             optimizer.zero_grad()
             recon_batch, mu, logvar = model(data)
@@ -76,16 +78,16 @@ def train(config, model, train_data, criterion, optimizer, is_VAE=False):
 
         update_count += 1
 
-        if batch_idx % config.log_interval == 0 and batch_idx > 0:
+        if batch_idx % parameters["log_interval"] == 0 and batch_idx > 0:
             elapsed = time.time() - start_time
             print(
                 "| epoch {:3d} | {:4d}/{:4d} batches | ms/batch {:4.2f} | "
                 "loss {:4.2f}".format(
-                    config.epoch,
+                    parameters["epoch"],
                     batch_idx,
-                    len(range(0, N, config.batch_size)),
-                    elapsed * 1000 / config.log_interval,
-                    train_loss / config.log_interval,
+                    len(range(0, N, parameters["batch_size"])),
+                    elapsed * 1000 / parameters["log_interval"],
+                    train_loss / parameters["log_interval"],
                 )
             )
 
@@ -93,12 +95,14 @@ def train(config, model, train_data, criterion, optimizer, is_VAE=False):
             train_loss = 0.0
 
 
-def evaluate(config, model, criterion, train_data, data_tr, data_te, is_VAE=False):
+def evaluate(config, model, criterion, train_data, data_tr, data_te, is_VAE):
+    parameters = config["parameters"]
+
     N = train_data.shape[0]
 
     # Turn on evaluation mode
     model.eval()
-    global update_count
+    update_count = 0
     e_idxlist = list(range(data_tr.shape[0]))
     e_N = data_tr.shape[0]
     total_val_loss_list = []
@@ -107,21 +111,21 @@ def evaluate(config, model, criterion, train_data, data_tr, data_te, is_VAE=Fals
     r50_list = []
 
     with torch.no_grad():
-        for start_idx in range(0, e_N, config.batch_size):
-            end_idx = min(start_idx + config.batch_size, N)
+        for start_idx in range(0, e_N, parameters["batch_size"]):
+            end_idx = min(start_idx + parameters["batch_size"], N)
             data = data_tr[e_idxlist[start_idx:end_idx]]
             heldout_data = data_te[e_idxlist[start_idx:end_idx]]
 
-            data_tensor = naive_sparse2tensor(data).to(config.device)
+            data_tensor = naive_sparse2tensor(data).to(config["device"])
             if is_VAE:
 
-                if config.total_anneal_steps > 0:
+                if parameters["total_anneal_steps"] > 0:
                     anneal = min(
-                        config.anneal_cap,
-                        1.0 * update_count / config.total_anneal_steps,
+                        parameters["anneal_cap"],
+                        1.0 * update_count / parameters["total_anneal_steps"],
                     )
                 else:
-                    anneal = config.anneal_cap
+                    anneal = parameters["anneal_cap"]
 
                 recon_batch, mu, logvar = model(data_tensor)
 
@@ -178,14 +182,19 @@ def run(
 
     N = train_data.shape[0]
 
-    optimizer = optim.Adam(model.parameterss(), lr=1e-3, weight_decay=parameters.wd)
-    criterion = loss_function_dae
+    optimizer = optim.Adam(model.parameters(), lr=1e-3, weight_decay=parameters["wd"])
+    if config["model"] == "MultiDAE":
+        criterion = loss_function_dae
+        is_VAE = False
+    elif config["model"] == "MultiVAE":
+        criterion = loss_function_vae
+        is_VAE = True
 
-    for epoch in range(1, parameters.epochs + 1):
+    for epoch in range(1, parameters["epochs"] + 1):
         epoch_start_time = time.time()
-        train(model, criterion, train_data, optimizer, is_VAE=False)
+        train(config, model, train_data, criterion, optimizer, is_VAE)
         val_loss, n100, r20, r50 = evaluate(
-            model, criterion, train_data, vad_data_tr, vad_data_te, is_VAE=False
+            config, model, criterion, train_data, vad_data_tr, vad_data_te, is_VAE
         )
         print("-" * 89)
         print(
@@ -196,13 +205,14 @@ def run(
         )
         print("-" * 89)
 
-        n_iter = epoch * len(range(0, N, parameters.batch_size))
+        n_iter = epoch * len(range(0, N, parameters["batch_size"]))
 
         # Save the model if the n100 is the best we've seen so far.
         if n100 > best_n100:
             with open(
                 os.path.join(
-                    config.model_save_path, f"{config.model}_V_{config.config_ver}.pt"
+                    config["model_save_path"],
+                    f"{config['model']}_V_{config['config_ver']}.pt",
                 ),
                 "wb",
             ) as f:
@@ -212,7 +222,7 @@ def run(
     # Load the best saved model.
     with open(
         os.path.join(
-            config.model_save_path, f"{config.model}_V_{config.config_ver}.pt"
+            config["model_save_path"], f"{config['model']}_V_{config['config_ver']}.pt"
         ),
         "rb",
     ) as f:
@@ -220,7 +230,7 @@ def run(
 
     # Run on test data.
     test_loss, n100, r20, r50 = evaluate(
-        model, criterion, test_data_tr, test_data_te, is_VAE=False
+        config, model, criterion, train_data, test_data_tr, test_data_te, is_VAE
     )
     print("=" * 89)
     print(
@@ -230,13 +240,29 @@ def run(
     print("=" * 89)
 
 
-def inference(
-    config, model, train_data, vad_data_tr, vad_data_te, test_data_tr, test_data_te
-):
-    # 전체 raw_data를 인덱싱하여 submit_data 데이터 프레임으로 생성
-    submit_data = numerize(raw_data, profile2id, show2id)
+def inference(config, model, loader):
+    raw_data = pd.read_csv(
+        os.path.join(config["data_path"], "train_ratings.csv"), header=0
+    )
+    raw_data, user_activity, item_popularity = filter_triplets(
+        raw_data, min_uc=5, min_sc=0
+    )
+    unique_uid = user_activity["user"].unique()
 
-    n_items = len(unique_sid)
+    n_users = unique_uid.size  # 31360
+    n_heldout_users = 3000
+
+    tr_users = unique_uid[: (n_users - n_heldout_users * 2)]
+    train_plays = raw_data.loc[raw_data["user"].isin(tr_users)]
+    unique_sid = pd.unique(train_plays["item"])
+
+    show2id = dict((sid, i) for (i, sid) in enumerate(unique_sid))
+    profile2id = dict((pid, i) for (i, pid) in enumerate(unique_uid))
+
+    # 전체 raw_data를 인덱싱하여 submit_data 데이터 프레임으로 생성
+    submit_data = loader.load_data("submit")
+    n_items = loader.load_n_items()
+
     n_users = submit_data["uid"].max() + 1
     rows, cols = submit_data["uid"], submit_data["sid"]
 
@@ -249,8 +275,11 @@ def inference(
     model.eval()
     with torch.no_grad():
         data = submit_csr_data
-        data_tensor = naive_sparse2tensor(data).to(config.device)
-        recon_batch, mu, logvar = model(data_tensor)
+        data_tensor = naive_sparse2tensor(data).to(config["device"])
+        if config["model"] == "MultiDAE":
+            recon_batch = model(data_tensor)
+        if config["model"] == "MultiVAE":
+            recon_batch, mu, logvar = model(data_tensor)
         recon_batch = recon_batch.cpu().numpy()
         recon_batch[data.nonzero()] = (
             -np.inf
@@ -272,5 +301,10 @@ def inference(
 
     # 데이터 export
     inference_df.to_csv(
-        os.path.join("/data/ephemeral/data/미션", "submit_data.csv"), index=False
+        os.path.join(
+            config["submit_path"], f"{config['model']}_V_{config['config_ver']}.csv"
+        ),
+        index=False,
     )
+
+    print("Inference Done!")

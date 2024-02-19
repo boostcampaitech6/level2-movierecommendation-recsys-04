@@ -8,7 +8,7 @@ import logging
 import json
 import yaml
 
-from model import *
+from .model import *
 
 
 def load_config(args):
@@ -30,10 +30,10 @@ def load_model(args, config, p_dims):
     data : data는 data_loader로 처리된 데이터를 의미합니다.
     """
 
-    if args.model == "multidae":
-        model = MultiDAE(p_dims).to(config.device)
-    elif args.model == "multivae":
-        model = MultiVAE(p_dims).to(config.device)
+    if args.model == "MultiDAE":
+        model = MultiDAE(p_dims).to(config["device"])
+    elif args.model == "MultiVAE":
+        model = MultiVAE(p_dims).to(config["device"])
     else:
         raise ValueError(
             "MODEL is not exist : select model in [FM,FFM,NCF,WDN,DCN,CNN_FM,DeepCoNN]"
