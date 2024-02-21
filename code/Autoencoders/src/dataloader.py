@@ -34,11 +34,11 @@ def filter_triplets(tp, min_uc=5, min_sc=0):
 # 훈련된 모델을 이용해 검증할 데이터를 분리하는 함수입니다.
 # 100개의 액션이 있다면, 그중에 test_prop 비율 만큼을 비워두고, 그것을 모델이 예측할 수 있는지를
 # 확인하기 위함입니다.
-def split_train_test_proportion(data, test_prop=0.2):
+def split_train_test_proportion(data, seed, test_prop=0.2):
     data_grouped_by_user = data.groupby("user")
     tr_list, te_list = list(), list()
 
-    np.random.seed(98765)
+    np.random.seed(seed)
 
     for _, group in data_grouped_by_user:
         n_items_u = len(group)
@@ -118,11 +118,13 @@ def Data_Preprocess(config):
     # Validation과 Test에는 input으로 사용될 tr 데이터와 정답을 확인하기 위한 te 데이터로 분리되었습니다.
     vad_plays = raw_data.loc[raw_data["user"].isin(vd_users)]
     vad_plays = vad_plays.loc[vad_plays["item"].isin(unique_sid)]
-    vad_plays_tr, vad_plays_te = split_train_test_proportion(vad_plays)
+    vad_plays_tr, vad_plays_te = split_train_test_proportion(vad_plays, config["seed"])
 
     test_plays = raw_data.loc[raw_data["user"].isin(te_users)]
     test_plays = test_plays.loc[test_plays["item"].isin(unique_sid)]
-    test_plays_tr, test_plays_te = split_train_test_proportion(test_plays)
+    test_plays_tr, test_plays_te = split_train_test_proportion(
+        test_plays, config["seed"]
+    )
 
     train_data = numerize(train_plays, profile2id, show2id)
     train_data.to_csv(os.path.join(pro_dir, "train.csv"), index=False)

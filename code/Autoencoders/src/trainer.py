@@ -248,6 +248,9 @@ def inference(config, model, loader):
         raw_data, min_uc=5, min_sc=0
     )
     unique_uid = user_activity["user"].unique()
+    np.random.seed(config["seed"])
+    idx_perm = np.random.permutation(unique_uid.size)
+    unique_uid = unique_uid[idx_perm]
 
     n_users = unique_uid.size  # 31360
     n_heldout_users = 3000
