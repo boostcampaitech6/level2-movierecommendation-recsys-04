@@ -18,7 +18,7 @@ def main(args):
 
     ##### Data Preprocess
     print("##### Data Preprocess ...")
-    if args.preprocess == True:
+    if args.preprocess == True:  # seed가 바뀌면 반드시 preprocess를 해야 합니다.
         Data_Preprocess(config)
 
     ##### Load DataLoader
@@ -31,8 +31,7 @@ def main(args):
 
     ##### Load Model
     print("##### Load Model ...")
-    p_dims = [200, 600, n_items]
-    model = load_model(args, config, p_dims)
+    model = load_model(args, config, n_items)
 
     ##### Training
     run(config, model, train_data, vad_data_tr, vad_data_te, test_data_tr, test_data_te)
