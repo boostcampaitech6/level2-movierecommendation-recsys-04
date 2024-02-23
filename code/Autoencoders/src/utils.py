@@ -20,7 +20,7 @@ def load_config(args):
     return config
 
 
-def load_model(args, config, p_dims):
+def load_model(args, config, n_items):
     """
     [description]
     입력받은 args 값에 따라 모델을 선택하며, 모델이 존재하지 않을 경우 ValueError를 발생시킵니다.
@@ -29,11 +29,18 @@ def load_model(args, config, p_dims):
     args : argparse로 입력받은 args 값으로 이를 통해 모델을 선택합니다.
     data : data는 data_loader로 처리된 데이터를 의미합니다.
     """
+    parameters = config["parameters"]
+
+    p_dims = parameters["p_dims"] + [n_items]
 
     if args.model == "MultiDAE":
-        model = MultiDAE(p_dims).to(config["device"])
+        model = MultiDAE(p_dims=p_dims, dropout=parameters["dropout"]).to(
+            config["device"]
+        )
     elif args.model == "MultiVAE":
-        model = MultiVAE(p_dims).to(config["device"])
+        model = MultiVAE(p_dims=p_dims, dropout=parameters["dropout"]).to(
+            config["device"]
+        )
     else:
         raise ValueError(
             "MODEL is not exist : select model in [FM,FFM,NCF,WDN,DCN,CNN_FM,DeepCoNN]"
