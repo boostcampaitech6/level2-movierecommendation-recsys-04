@@ -1,8 +1,6 @@
 ![Untitled](https://github.com/boostcampaitech6/level2-movierecommendation-recsys-04/assets/8871767/2f6f5686-3313-47d2-aa04-261a4896e782)
 
 # 목차
-### [Team](#Team-1)
-### [Skill](#Skill-1)
 ### [Project Overview](#Project-Overview-1)
 ### [Project Structure](#Project-Structure-1)
 &nbsp;&nbsp;[Calendar](#Calendar)<br>
@@ -12,6 +10,76 @@
 &nbsp;&nbsp;[3. Model](#3-Model)<br>
 &nbsp;&nbsp;[4. Performance](#5-Performance)<br> 
 ### [Laboratory Report](#Laboratory-Report-1)
+### [Team](#Team-1)
+### [Skill](#Skill-1)
+
+# Project Overview
+
+본 프로젝트는 사용자의 영화 시청 이력 데이터를 바탕으로 사용자가 다음에 시청할 영화 및 좋아할 영화를 인공지능을 통해 예측하는 프로젝트이다.
+ 
+![Untitled 1](https://github.com/boostcampaitech6/level2-movierecommendation-recsys-04/assets/8871767/800c4636-6f07-4522-9699-964aaf813af9)
+
+# Project Structure
+
+### Calendar
+![Untitled 2](https://github.com/boostcampaitech6/level2-movierecommendation-recsys-04/assets/8871767/ba9ac29f-f1a2-4ff1-a4bf-d57a08f93a9c)
+
+### Project Pipline
+![수정됨_Untitled 3 (2)](https://github.com/boostcampaitech6/level2-movierecommendation-recsys-04/assets/8871767/f1f781dd-a5ed-4466-a9a1-2ea5e8e14bd0)
+
+### 1. Environment
+- 서버 정보 : AI Stages GPU V100 서버
+- 버전 정보 : Python 3.10.13
+- 패키지 정보
+```
+numpy==1.22.2
+pandas==1.4.1
+python-dateutil==2.8.2
+pytz==2021.3
+recbole==1.2.0
+scipy==1.8.0
+six==1.16.0
+torch==1.10.2
+tqdm==4.62.3
+typing_extensions==4.1.1
+```
+### 2. Data
+#### **train_ratings.csv**
+- 주 학습 데이터로 userid*,* itemid, timestamp로 구성되어있으며, 총 **5,154,471**의 행으로 이루어졌다.
+- `userid` : 총 **31,360** 명의 유저의 userid가 존재
+- `itemid` : 총 **6,807** 건의 영화의 itemid가 존재
+- `timestamp` : 유저가 영화를 시청한 시간 이력
+
+#### **directors.tsv**
+- 영화별 감독에 대한 자료로, 총 **5,905**개의 행으로 이루어져있다.
+- `item` : 영화의 itemid
+- `director` : 영화 감독의 이름
+#### **writers.tsv**
+- 영화별 작가에 대한 자료로, 총 **11,307**개의 행으로 이루어져있다.
+- `item` : 영화의 itemid
+- `writer` : 영화 작가의 이름
+#### **genres.tsv**
+- 영화의 장르 (한 영화에 여러 장르가 포함될 수 있음)에 대한 자료로, 총 **15,934**개의 행, 총 **18개의 장르**로 이루어져 있다.
+- `item` : 영화의 itemid
+- `genre` : 영화의 장르명
+#### **years.tsv**
+- 영화의 개봉년도에 대한 자료로, 총 **6,799**개의 행으로 이루어져있다.
+- `item` : 영화의 itemid
+- `year` : 영화의 개봉년도
+#### **titles.tsv**
+- 영화의 제목에 대한 자료로, 총 **6,807**개의 행으로 이루어져 있다.
+- `item` : 영화의 itemid
+- `title` : 영화의 타이틀
+#### **Ml_item2attributes.json**
+- 전처리에 의해 생성된 데이터로 item과 genre를 매핑한 후 다음과 같이 json형식으로 처리
+
+### 3. Model
+  - **Boosting model**
+    ![Boosting_Flow_Chart](https://github.com/boostcampaitech6/level2-dkt-recsys-04/assets/8871767/4031ba71-8ec2-4232-ab36-8fbc3e55f7bc)
+  - **Sequence model**
+    ![model_seq](https://github.com/boostcampaitech6/level2-dkt-recsys-04/assets/95879995/82b5668c-2b82-4038-8900-0ab418a64bad)
+
+### 4. Performance
 
 # Team
 | **김세훈** | **문찬우** | **김시윤** | **배건우** | **이승준** |
@@ -47,65 +115,5 @@
   ![Ubuntu](https://img.shields.io/badge/Ubuntu-E95420?style=for-the-badge&logo=ubuntu&logoColor=white)
   ![Anaconda](https://img.shields.io/badge/Anaconda-44A833.svg?style=for-the-badge&logo=Anaconda&logoColor=white)
 
-# Project Overview
-
-본 프로젝트는 사용자의 영화 시청 이력 데이터를 바탕으로 사용자가 다음에 시청할 영화 및 좋아할 영화를 인공지능을 통해 예측하는 프로젝트이다.
- 
-![Untitled 1](https://github.com/boostcampaitech6/level2-movierecommendation-recsys-04/assets/8871767/800c4636-6f07-4522-9699-964aaf813af9)
-
-# Project Structure
-
-### Calendar
-![Untitled 2](https://github.com/boostcampaitech6/level2-movierecommendation-recsys-04/assets/8871767/ba9ac29f-f1a2-4ff1-a4bf-d57a08f93a9c)
-
-### Project Pipline
-![Untitled 3](https://github.com/boostcampaitech6/level2-movierecommendation-recsys-04/assets/8871767/b85a8378-883d-409f-9c57-11f362ac6329)
-### 1. Environment
-```
-numpy==1.22.2
-pandas==1.4.1
-python-dateutil==2.8.2
-pytz==2021.3
-recbole==1.2.0
-scipy==1.8.0
-six==1.16.0
-torch==1.10.2
-tqdm==4.62.3
-typing_extensions==4.1.1
-```
-### 2. Data
-**`userID`** : 사용자 별 고유번사로 총 7,422명의 사용자 데이터가 존재합니다.
-
-**`assessmentItemID` :** 문항의 고유번호이며, 총 9,454개의 고유 문항이 있습니다.
-
-**`testID` :** 시험지의 고유번호이며, 총 1,537개의 고유한 시험지가 있습니다.
-
-**`answerCode` :** 사용자가 해당 문항을 맞췄는지 여부이며,  0은 틀릿 것, 1은 맞춘 것입니다. test 데이터의 경우 마지막 시퀀스의 answerCode가 -1로 예측해야 할 값입니다.
-
-**`Timestamp` :** 사용자가 해당문항을 풀기 시작한 시점의 데이터입니다.
-
-**`KnowleadgeTag` :** 문항 당 하나씩 배정되는 태그로, 일종의 중분류 역할을 합니다. 912개의 고유 태그가 존재합니다.
-
-![feature](https://github.com/boostcampaitech6/level2-dkt-recsys-04/assets/68991530/198f77f4-ee69-4172-9033-0602a47cf6ba)
-### 3. Model
-  - **Boosting model**
-    ![Boosting_Flow_Chart](https://github.com/boostcampaitech6/level2-dkt-recsys-04/assets/8871767/4031ba71-8ec2-4232-ab36-8fbc3e55f7bc)
-  - **Sequence model**
-    ![model_seq](https://github.com/boostcampaitech6/level2-dkt-recsys-04/assets/95879995/82b5668c-2b82-4038-8900-0ab418a64bad)
-
-### 4. Performance
-
-| **Model** | **LGBM-v1** | **Saint** | **Last-Query + GRU** | **LSTMATTN** | **GRUATTN** | **LGBM-v2** |
-| :------: |  :------: | :------: | :------: | :------: | :------: | :------: |
-| **Weight** | **0.67** | **0.084** | **0.064** | **0.064** | **0.059** | **0.059** | 
-
-| **Public AUC** | **Public ACC** |
-| :------: |  :------: | 
-| 0.8156 | 0.7527 | 
-
-![result](https://github.com/boostcampaitech6/level2-dkt-recsys-04/assets/68991530/ad3ecb4d-ce3d-4735-836e-318d1c998502)
-
 # Laboratory Report
 [DKT_Recsys_팀_리포트](https://github.com/boostcampaitech6/level2-dkt-recsys-04/blob/main/DKT_Recsys_%ED%8C%80_%EB%A6%AC%ED%8F%AC%ED%8A%B8(04%EC%A1%B0).pdf)
-
-
