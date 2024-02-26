@@ -21,13 +21,13 @@
 
 # Project Structure
 
-### Calendar
+### 1. Calendar
 ![Untitled 2](https://github.com/boostcampaitech6/level2-movierecommendation-recsys-04/assets/8871767/ba9ac29f-f1a2-4ff1-a4bf-d57a08f93a9c)
 
-### Project Pipline
+### 2. Project Pipline
 ![수정됨_Untitled 3 (2)](https://github.com/boostcampaitech6/level2-movierecommendation-recsys-04/assets/8871767/f1f781dd-a5ed-4466-a9a1-2ea5e8e14bd0)
 
-### 1. Environment
+### 3. Environment
 - 서버 정보 : AI Stages GPU V100 서버
 - 버전 정보 : Python 3.10.13
 - 패키지 정보
@@ -43,7 +43,7 @@ torch==1.10.2
 tqdm==4.62.3
 typing_extensions==4.1.1
 ```
-### 2. Data
+### 4. Data
 #### **train_ratings.csv**
 - 주 학습 데이터로 userid*,* itemid, timestamp로 구성되어있으며, 총 **5,154,471**의 행으로 이루어졌다.
 - `userid` : 총 **31,360** 명의 유저의 userid가 존재
@@ -73,13 +73,15 @@ typing_extensions==4.1.1
 #### **Ml_item2attributes.json**
 - 전처리에 의해 생성된 데이터로 item과 genre를 매핑한 후 다음과 같이 json형식으로 처리
 
-### 3. Model
-  - **Boosting model**
-    ![Boosting_Flow_Chart](https://github.com/boostcampaitech6/level2-dkt-recsys-04/assets/8871767/4031ba71-8ec2-4232-ab36-8fbc3e55f7bc)
-  - **Sequence model**
-    ![model_seq](https://github.com/boostcampaitech6/level2-dkt-recsys-04/assets/95879995/82b5668c-2b82-4038-8900-0ab418a64bad)
+### 5. Model
 
-### 4. Performance
+### 6. Performance
+
+### 7. Final submission
+Hard Voting 앙상블 : EASE(3), ADMMSLIM(3), CDAE(1), MultiVAE(1), MultiDAE(1), DeepFM(1), SASRec(1), LightGCN(1), Bert4Rec(1)
+| Public Score | Private Score |
+| --- | --- |
+| 0.1632 | 0.1623 |
 
 # Team
 | **김세훈** | **문찬우** | **김시윤** | **배건우** | **이승준** |
@@ -116,4 +118,4 @@ typing_extensions==4.1.1
   ![Anaconda](https://img.shields.io/badge/Anaconda-44A833.svg?style=for-the-badge&logo=Anaconda&logoColor=white)
 
 # Laboratory Report
-[DKT_Recsys_팀_리포트](https://github.com/boostcampaitech6/level2-dkt-recsys-04/blob/main/DKT_Recsys_%ED%8C%80_%EB%A6%AC%ED%8F%AC%ED%8A%B8(04%EC%A1%B0).pdf)
+[Movie Recommendation Wrap-Up Report]
