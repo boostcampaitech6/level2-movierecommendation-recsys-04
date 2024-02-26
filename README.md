@@ -95,4 +95,4 @@ Hard Voting 앙상블 : EASE(3), ADMMSLIM(3), CDAE(1), MultiVAE(1), MultiDAE(1),
   ![Anaconda](https://img.shields.io/badge/Anaconda-44A833.svg?style=for-the-badge&logo=Anaconda&logoColor=white)
 
 # Laboratory Report
-![Movie Recommendation Wrap-Up Report](https://github.com/boostcampaitech6/level2-movierecommendation-recsys-04/blob/readme/docs/Movie%20Reccomendation_RecSys_%ED%8C%80%20%EB%A6%AC%ED%8F%AC%ED%8A%B8(04%EC%A1%B0).pdf)
+[Movie Recommendation Wrap-Up Report](https://github.com/boostcampaitech6/level2-movierecommendation-recsys-04/blob/readme/docs/Movie%20Reccomendation_RecSys_%ED%8C%80%20%EB%A6%AC%ED%8F%AC%ED%8A%B8(04%EC%A1%B0).pdf)
