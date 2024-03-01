@@ -1,0 +1,18 @@
+V0:
+  config_ver: 0
+  model: BERT4Rec
+  data_path: /data/ephemeral/data/train/
+  model_save_path: /data/ephemeral/level2-movierecommendation-recsys-04/code/Sequential/BERT4Rec/saved/
+  submit_path: /data/ephemeral/level2-movierecommendation-recsys-04/code/Sequential/BERT4Rec/submit/
+  seed: 42
+  parameters:
+    num_epochs: 3
+    batch_size: 128
+    lr: 1e-3
+    mask_prob: 0.15
+    max_len: 50
+    hidden_units: 50
+    num_heads: 1
+    num_layers: 2
+    dropout_rate: 0.5
+    num_workers: 1

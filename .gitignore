@@ -1,0 +1,12 @@
+*__pycache__
+*wandb
+
+*.npy
+*.pyc
+*.log
+*.tfevents
+*.json
+*.tsv
+*.csv
+*.pkl
+*.pt
